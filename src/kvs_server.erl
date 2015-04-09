@@ -25,7 +25,6 @@ handle_cast(_Msg, State) ->
 
 handle_info({tcp, Socket, Data}, State=#state{socket=Socket}) ->
 	gen_tcp:send(Socket, kvs_binary(Data)),
-	inet:setopts(Socket, [{active, once}]),
 	{noreply, State, ?CLIENT_TIMEOUT};
 handle_info({tcp_closed, _Socket}, State) ->
 	{stop, normal, State};
