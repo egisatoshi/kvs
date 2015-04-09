@@ -1,0 +1,12 @@
+{application, kvs,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { kvs_app, []}},
+  {env, []}
+ ]}.
