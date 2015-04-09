@@ -11,9 +11,21 @@ ok
 2>
 ```
 
-We can connect to this server using `erlmc` in another terminal.
+We can connect to this server using [`erlmc`](https://github.com/Spawnerl/erlmc) in another terminal.
 
 ```
+% git clone https://github.com/Spawnerl/erlmc
+% cd erlmc
+% make
+% erl -pa ebin/
+Erlang/OTP 17 [erts-6.1] [source] [64-bit halfword] [smp:3:3] [async-threads:10] [kernel-poll:false]
+
+Eshell V6.1  (abort with ^G)
+1> erlmc:start().
+ok
+2> erlmc:version().
+[{{"localhost",11211},<<"1.3.1">>}]
+3> 
 ```
 
 We can launch an observer by the following command on the interpreter.
@@ -26,7 +38,8 @@ ok
 
 ## See Also
 
-Please refer the following tutorial or documents to understand [this server program](https://github.com/Spawnerl/kvs/blob/master/kvs_server.erl).
+Please refer the following documents to understand [this server program](https://github.com/Spawnerl/kvs/blob/master/src/kvs_server.erl).
 
-* [Processes](http://www.erlang.org/doc/reference_manual/processes.html)
-* [gen_tcp](http://erlang.org/doc/man/gen_tcp.html)
+* [application](http://erlang.org/doc/man/application.html)
+* [supervisor](http://erlang.org/doc/man/supervisor.html)
+* [gen_server](http://erlang.org/doc/man/gen_server.html)
