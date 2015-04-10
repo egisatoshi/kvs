@@ -37,6 +37,9 @@ ok
 
 ## Memcache Binary Protocol
 
+
+`erlmc:set(Hello, <<"World">>).`
+
 ```
    Set request:
 
@@ -123,6 +126,8 @@ ok
    Key                 : None
    Value               : None
 ```
+
+`erlmc:get(Hello).`
 
 ```
    GetK request:
@@ -250,6 +255,8 @@ ok
    Value        (24-32): The textual string "Not found"
 
 ```
+
+`erlmc:delete(Hello).`
 
 ```
    Delete request:
