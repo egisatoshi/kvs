@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 -include("kvs.hrl").
-
+-include_lib("eunit/include/eunit.hrl").
 
 -export([start_link/1]).
 
@@ -42,15 +42,46 @@ code_change(_, State, _) ->
     {ok, State}.
 
 
-% Exercise. Complete implementation of the handlers for set, get and delete requests
+kvs_binary(<< ?Magic_Request:8, ?OP_Set:8, KeySize:16, ExtrasSize:8, _:8, _:16, BodySize:32, _:32, _:64,
+              _:ExtrasSize/binary, Key:KeySize/binary, Value/binary >>) ->
+    ?debugVal(KeySize),
+    ?debugVal(BodySize),
+    ?debugVal(ExtrasSize),
+    ?debugVal(Key),
+    ?debugVal(Value),
+    ets:insert(training_kvs, {Key, Value}),
+    << ?Magic_Response:8, ?OP_Set:8, 0:16, 0:8, 0:8, 0:16, 0:32, 0:32, 1:64 >>;
 kvs_binary(<< ?Magic_Request:8, ?OP_Version:8, KeySize:16, ExtrasSize:8, _:8, _:16, _:32, _:32, _:64,
               _:ExtrasSize/binary, _:KeySize/binary, _/binary >>) ->
     BodySize = byte_size(?Memcache_Protocol_Version),
     << ?Magic_Response:8, ?OP_Version:8, 0:16, 0:8, 0:8, 0:16, BodySize:32, 0:32, 0:64,
        ?Memcache_Protocol_Version/binary >>;
-kvs_binary(_) ->
-     error_message(<<"Not implemented">>).
-
+kvs_binary(<< ?Magic_Request:8, ?OP_GetK:8, KeySize:16, ExtrasSize:8, _:8, _:16, BodySize:32, _:32, CAS:64,
+              _:ExtrasSize/binary, Key:KeySize/binary, _/binary >>) ->
+    ?debugVal(KeySize),
+    ?debugVal(BodySize),
+    ?debugVal(CAS),
+    ?debugVal(ExtrasSize),
+    ?debugVal(Key),
+    ?debugVal(ets:lookup(training_kvs, Key)),
+    case ets:lookup(training_kvs, Key) of
+        [{_, Value}|_] ->
+            ValueSize = byte_size(Value),
+            << ?Magic_Response:8, ?OP_Get:8, KeySize:16, 0:8, 0:8, 0:16, (KeySize + ValueSize):32, 0:32, 1:64,
+               Key:KeySize/binary, Value:ValueSize/binary >>;
+        [] -> error_message(<<"Not found">>)
+     end;
+kvs_binary(<< ?Magic_Request:8, ?OP_Delete:8, KeySize:16, ExtrasSize:8, _:8, _:16, BodySize:32, _:32, CAS:64,
+              _:ExtrasSize/binary, Key:KeySize/binary, _/binary >>) ->
+    ?debugVal(KeySize),
+    ?debugVal(BodySize),
+    ?debugVal(CAS),
+    ?debugVal(ExtrasSize),
+    ?debugVal(Key),
+    ets:delete(training_kvs, Key),
+    << ?Magic_Response:8, ?OP_Delete:8, 0:16, 0:8, 0:8, 0:16, 0:32, 0:32, 1:64 >>;
+kvs_binary(_) -> error_message(<<"Not implemented">>).
+ 
 error_message(Cause) ->
     BodySize = byte_size(Cause),
     << ?Magic_Response:8, 0:8, 0:16, 0:8, 0:8, 1:16, BodySize:32, 0:32, 0:64,
